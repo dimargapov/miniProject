@@ -4,9 +4,9 @@ require_once 'dbConnection.php';
 if (!empty($_POST['name']) && !empty($_POST['message'])) {
     $name = htmlspecialchars(trim($_POST['name']));
     $message = htmlspecialchars(trim($_POST['message']));
-        $stmt = $conn->prepare("INSERT INTO messages (name, message) VALUES (?, ?)");
-        $stmt->execute([$name, $message]);
-        $_SESSION['success_message'] = 'Запись успешно сохранена!';
+        $stmt = $conn->prepare("INSERT INTO messages (name, message, status) VALUES (?, ?, ?)");
+        $stmt->execute([$name, $message, 'pending']);
+        $_SESSION['success_message'] = 'Ваше сообщение отправлено на модерацию!';
         header("Location: /miniProject/index.php ");
         exit;
 }
@@ -18,7 +18,7 @@ $totalData = $conn->query("SELECT COUNT(*) FROM messages");
 $totalRows = $totalData->fetchColumn();
 $totalPages = ceil($totalRows / $limit);
 
-$data = $conn->prepare("SELECT * FROM messages ORDER BY created_at DESC LIMIT ?, ? ");
+$data = $conn->prepare("SELECT * FROM messages WHERE status='approved' ORDER BY created_at DESC LIMIT ?, ? ");
 $data->bindParam(1, $offset, PDO::PARAM_INT);
 $data->bindParam(2, $limit, PDO::PARAM_INT);
 $data->execute();
